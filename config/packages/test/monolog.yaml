@@ -1,0 +1,8 @@
+monolog:
+    handlers:
+        main:
+            type: test
+            channels: ['!request']
+        request:
+            type: test
+            channels: ['request']
