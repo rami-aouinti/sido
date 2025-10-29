@@ -36,10 +36,26 @@ final class SubmitScoreHandlerTest extends TestCase
         self::assertCount(1, $this->repository->topScores(10));
     }
 
-    public function testHandleWithInvalidDataThrowsException(): void
+    /**
+     * @dataProvider invalidSubmissionProvider
+     */
+    public function testHandleWithInvalidDataThrowsException(string $name, float $reactionTime): void
     {
         $this->expectException(ScoreValidationException::class);
 
-        $this->handler->handle(new SubmitScoreCommand('', 0));
+        $this->handler->handle(new SubmitScoreCommand($name, $reactionTime));
+    }
+
+    /**
+     * @return iterable<string, array{string, float}>
+     */
+    public static function invalidSubmissionProvider(): iterable
+    {
+        yield 'empty name' => ['', 0.0];
+        yield 'name too short' => ['Al', 150.0];
+        yield 'name too long' => [str_repeat('a', 31), 150.0];
+        yield 'name invalid characters' => ['Alice!', 150.0];
+        yield 'reaction time too small' => ['Alice', 0.5];
+        yield 'reaction time too large' => ['Alice', 10001.0];
     }
 }
