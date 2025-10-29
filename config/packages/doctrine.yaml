@@ -1,0 +1,16 @@
+doctrine:
+    dbal:
+        url: '%env(resolve:DATABASE_URL)%'
+        charset: UTF8
+    orm:
+        auto_generate_proxy_classes: true
+        naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+        enable_lazy_ghost_objects: true
+        auto_mapping: false
+        mappings:
+            AppScore:
+                is_bundle: false
+                type: attribute
+                dir: '%kernel.project_dir%/src/Infrastructure/Persistence/Doctrine/Entity'
+                prefix: 'App\\Infrastructure\\Persistence\\Doctrine\\Entity'
+                alias: AppScore
