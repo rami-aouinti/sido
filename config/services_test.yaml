@@ -1,2 +1,0 @@
-services:
-    Symfony\Component\Mercure\HubInterface: '@App\Infrastructure\Messaging\InMemoryHub'

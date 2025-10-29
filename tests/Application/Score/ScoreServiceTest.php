@@ -6,10 +6,11 @@ namespace App\Tests\Application\Score;
 
 use App\Application\Score\Exception\ScoreValidationException;
 use App\Application\Score\ScoreService;
-use App\Infrastructure\Messaging\InMemoryHub;
 use App\Infrastructure\Messaging\MercureTop10Publisher;
 use App\Infrastructure\Score\InMemoryScoreRepository;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Mercure\HubInterface;
+use Symfony\Component\Mercure\Update;
 use Symfony\Component\Validator\Validation;
 use const JSON_THROW_ON_ERROR;
 use function json_decode;
@@ -18,12 +19,12 @@ final class ScoreServiceTest extends TestCase
 {
     private ScoreService $service;
     private InMemoryScoreRepository $repository;
-    private InMemoryHub $hub;
+    private HubInterface $hub;
 
     protected function setUp(): void
     {
         $this->repository = new InMemoryScoreRepository();
-        $this->hub = new InMemoryHub();
+        $this->hub = $this->createMock(HubInterface::class);
         $validator = Validation::createValidatorBuilder()
             ->enableAttributeMapping()
             ->getValidator();
@@ -44,16 +45,24 @@ final class ScoreServiceTest extends TestCase
 
     public function testSubmitScorePublishesTopScores(): void
     {
+        $capturedUpdate = null;
+
+        $this->hub
+            ->expects(self::once())
+            ->method('publish')
+            ->with(self::callback(static function (Update $update) use (&$capturedUpdate): bool {
+                $capturedUpdate = $update;
+
+                return true;
+            }))
+            ->willReturn('1');
+
         $score = $this->service->submitScore('Alice', 200.5);
 
-        $updates = $this->hub->updates();
+        self::assertInstanceOf(Update::class, $capturedUpdate);
+        self::assertSame('/scores/top', $capturedUpdate->getTopic());
 
-        self::assertCount(1, $updates);
-        $update = $updates[0];
-
-        self::assertSame('/scores/top', $update->getTopic());
-
-        $payload = json_decode($update->getData(), true, 512, JSON_THROW_ON_ERROR);
+        $payload = json_decode($capturedUpdate->getData(), true, 512, JSON_THROW_ON_ERROR);
 
         self::assertIsArray($payload);
         self::assertArrayHasKey('scores', $payload);
