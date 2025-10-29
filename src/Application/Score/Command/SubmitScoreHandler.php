@@ -6,6 +6,7 @@ namespace App\Application\Score\Command;
 
 use App\Application\Score\Exception\ScoreValidationException;
 use App\Application\Score\ScoreSubmission;
+use App\Application\Score\TopScorePublisher;
 use App\Domain\Score\PlayerName;
 use App\Domain\Score\ReactionTime;
 use App\Domain\Score\Score;
@@ -16,7 +17,8 @@ final class SubmitScoreHandler
 {
     public function __construct(
         private readonly ScoreRepository $repository,
-        private readonly ValidatorInterface $validator
+        private readonly ValidatorInterface $validator,
+        private readonly TopScorePublisher $publisher
     ) {
     }
 
@@ -34,6 +36,7 @@ final class SubmitScoreHandler
 
         $score = new Score(new PlayerName($submission->name), new ReactionTime($submission->reactionTime));
         $this->repository->add($score);
+        $this->publisher->publish($this->repository->topScores(10));
 
         return $score;
     }

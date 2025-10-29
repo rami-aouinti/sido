@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "63312d1857023e13025c57fee0eb8d4f",
+    "content-hash": "e1680f8afa92d03fd911853ad105ae9c",
     "packages": [
         {
             "name": "psr/cache",
@@ -2510,6 +2510,19 @@
                 }
             ],
             "time": "2025-09-26T15:07:38+00:00"
+        },
+        {
+            "name": "symfony/mercure-bundle",
+            "version": "v0.3.9",
+            "type": "symfony-bundle",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Symfony Mercure Bundle",
+            "support": {
+                "source": "https://github.com/symfony/mercure-bundle"
+            }
         }
     ],
     "packages-dev": [],
