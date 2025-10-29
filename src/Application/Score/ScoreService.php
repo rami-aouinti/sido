@@ -20,6 +20,8 @@ final class ScoreService
     }
 
     /**
+     * @param positive-int $reactionTime
+     *
      * @throws ScoreValidationException
      */
     public function submitScore(string $name, int $reactionTime): Score

@@ -31,7 +31,7 @@ final class ScoreController
 
         if (!is_string($name)) {
             return new JsonResponse(
-                ['errors' => [['name' => 'payload', 'message' => 'Name must be a string and reaction time must be numeric.']]],
+                ['errors' => [['name' => 'payload', 'message' => 'Name must be a string and reaction time must be an integer.']]],
                 JsonResponse::HTTP_BAD_REQUEST
             );
         }
@@ -43,7 +43,7 @@ final class ScoreController
 
         if ($reactionTimeValue === null || filter_var($reactionTimeValue, FILTER_VALIDATE_INT) === false) {
             return new JsonResponse(
-                ['errors' => [['name' => 'payload', 'message' => 'Name must be a string and reaction time must be numeric.']]],
+                ['errors' => [['name' => 'payload', 'message' => 'Name must be a string and reaction time must be an integer.']]],
                 JsonResponse::HTTP_BAD_REQUEST
             );
         }

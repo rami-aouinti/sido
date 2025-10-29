@@ -41,6 +41,13 @@ final class ScoreServiceTest extends TestCase
         $this->service->submitScore('', 0);
     }
 
+    public function testSubmitScoreWithTooLongNameThrowsException(): void
+    {
+        $this->expectException(ScoreValidationException::class);
+
+        $this->service->submitScore(str_repeat('A', 256), 150);
+    }
+
     public function testLeaderboardReturnsScoresSortedAscending(): void
     {
         $this->service->submitScore('Bob', 300);
