@@ -28,11 +28,11 @@ final class SubmitScoreHandlerTest extends TestCase
 
     public function testHandlePersistsAndReturnsScore(): void
     {
-        $command = new SubmitScoreCommand('Alice', 200.5);
+        $command = new SubmitScoreCommand('Alice', 200);
         $score = $this->handler->handle($command);
 
         self::assertSame('Alice', $score->playerName()->value());
-        self::assertSame(200.5, $score->reactionTime()->toMilliseconds());
+        self::assertSame(200, $score->reactionTime()->toMilliseconds());
         self::assertCount(1, $this->repository->topScores(10));
     }
 

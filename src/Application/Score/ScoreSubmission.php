@@ -12,7 +12,7 @@ final class ScoreSubmission
         #[Assert\NotBlank(message: 'Name must not be empty.')]
         public readonly string $name,
         #[Assert\Positive(message: 'Reaction time must be greater than zero.')]
-        public readonly float $reactionTime
+        public readonly int $reactionTime
     ) {
     }
 }
