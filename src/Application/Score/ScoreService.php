@@ -5,33 +5,46 @@ declare(strict_types=1);
 namespace App\Application\Score;
 
 use App\Application\Score\Exception\ScoreValidationException;
-use App\Domain\Score\PlayerName;
-use App\Domain\Score\ReactionTime;
 use App\Domain\Score\Score;
 use App\Domain\Score\ScoreRepository;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
+use App\Domain\Score\ValueObject\DisplayName;
+use App\Domain\Score\ValueObject\ReactionTime;
+use InvalidArgumentException;
 
 final class ScoreService
 {
-    public function __construct(
-        private readonly ScoreRepository $repository,
-        private readonly ValidatorInterface $validator
-    ) {
+    public function __construct(private readonly ScoreRepository $repository)
+    {
     }
 
     /**
      * @throws ScoreValidationException
      */
-    public function submitScore(string $name, float $reactionTime): Score
+    public function submitScore(string $name, int $reactionTime): Score
     {
-        $submission = new ScoreSubmission($name, $reactionTime);
-        $violations = $this->validator->validate($submission);
+        $errors = [];
+        /** @var DisplayName|null $displayName */
+        $displayName = null;
+        /** @var ReactionTime|null $reactionTimeValue */
+        $reactionTimeValue = null;
 
-        if (count($violations) > 0) {
-            throw new ScoreValidationException($violations);
+        try {
+            $displayName = new DisplayName($name);
+        } catch (InvalidArgumentException $exception) {
+            $errors[] = ['name' => 'name', 'message' => $exception->getMessage()];
         }
 
-        $score = new Score(new PlayerName($submission->name), new ReactionTime($submission->reactionTime));
+        try {
+            $reactionTimeValue = new ReactionTime($reactionTime);
+        } catch (InvalidArgumentException $exception) {
+            $errors[] = ['name' => 'reactionTime', 'message' => $exception->getMessage()];
+        }
+
+        if ($errors !== []) {
+            throw new ScoreValidationException($errors);
+        }
+
+        $score = new Score($displayName, $reactionTimeValue);
         $this->repository->add($score);
 
         return $score;

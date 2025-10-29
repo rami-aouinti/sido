@@ -10,6 +10,7 @@ use App\Domain\Score\Score;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use function ctype_digit;
 
 #[Route(path: '/api/scores')]
 final class ScoreController
@@ -29,15 +30,26 @@ final class ScoreController
         $name = $payload['name'] ?? '';
         $reactionTime = $payload['reactionTime'] ?? null;
 
-        if (!is_string($name) || !is_numeric($reactionTime)) {
+        if (!is_string($name)) {
             return new JsonResponse(
-                ['errors' => [['name' => 'payload', 'message' => 'Name must be a string and reaction time must be numeric.']]],
+                ['errors' => [['name' => 'payload', 'message' => 'Name must be a string.']]],
+                JsonResponse::HTTP_BAD_REQUEST
+            );
+        }
+
+        if (is_string($reactionTime) && ctype_digit($reactionTime)) {
+            $reactionTime = (int) $reactionTime;
+        }
+
+        if (!is_int($reactionTime)) {
+            return new JsonResponse(
+                ['errors' => [['name' => 'payload', 'message' => 'Reaction time must be an integer.']]],
                 JsonResponse::HTTP_BAD_REQUEST
             );
         }
 
         try {
-            $score = $this->scoreService->submitScore($name, (float) $reactionTime);
+            $score = $this->scoreService->submitScore($name, $reactionTime);
         } catch (ScoreValidationException $exception) {
             return new JsonResponse(['errors' => $exception->toArray()], JsonResponse::HTTP_BAD_REQUEST);
         }

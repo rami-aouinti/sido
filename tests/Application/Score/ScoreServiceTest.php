@@ -8,7 +8,7 @@ use App\Application\Score\Exception\ScoreValidationException;
 use App\Application\Score\ScoreService;
 use App\Infrastructure\Score\InMemoryScoreRepository;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Validator\Validation;
+use function str_repeat;
 
 final class ScoreServiceTest extends TestCase
 {
@@ -18,27 +18,43 @@ final class ScoreServiceTest extends TestCase
     protected function setUp(): void
     {
         $this->repository = new InMemoryScoreRepository();
-        $validator = Validation::createValidatorBuilder()
-            ->enableAttributeMapping()
-            ->getValidator();
-
-        $this->service = new ScoreService($this->repository, $validator);
+        $this->service = new ScoreService($this->repository);
     }
 
     public function testSubmitScorePersistsAndReturnsScore(): void
     {
-        $score = $this->service->submitScore('Alice', 200.5);
+        $score = $this->service->submitScore(' Alice ', 200);
 
         self::assertSame('Alice', $score->playerName()->value());
-        self::assertSame(200.5, $score->reactionTime()->toMilliseconds());
+        self::assertSame(200, $score->reactionTime()->toMilliseconds());
         self::assertCount(1, $this->repository->topScores(10));
     }
 
     public function testSubmitScoreWithInvalidDataThrowsException(): void
     {
-        $this->expectException(ScoreValidationException::class);
+        try {
+            $this->service->submitScore('', 10);
+            self::fail('Expected exception was not thrown.');
+        } catch (ScoreValidationException $exception) {
+            $errors = $exception->toArray();
+            self::assertSame('name', $errors[0]['name']);
+            self::assertSame('reactionTime', $errors[1]['name']);
+        }
 
-        $this->service->submitScore('', 0);
+        $this->expectException(ScoreValidationException::class);
+        $this->service->submitScore('Valid Name', 10);
+    }
+
+    public function testSubmitScoreWithNameLongerThanAllowedThrowsException(): void
+    {
+        $this->expectException(ScoreValidationException::class);
+        $this->service->submitScore(str_repeat('A', 33), 120);
+    }
+
+    public function testSubmitScoreWithOutOfRangeReactionTimeThrowsException(): void
+    {
+        $this->expectException(ScoreValidationException::class);
+        $this->service->submitScore('Valid Name', 10001);
     }
 
     public function testLeaderboardReturnsScoresSortedAscending(): void

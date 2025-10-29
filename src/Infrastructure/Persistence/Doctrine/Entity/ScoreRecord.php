@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Persistence\Doctrine\Entity;
 
-use App\Domain\Score\PlayerName;
-use App\Domain\Score\ReactionTime;
 use App\Domain\Score\Score as DomainScore;
+use App\Domain\Score\ValueObject\DisplayName;
+use App\Domain\Score\ValueObject\ReactionTime;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -20,16 +20,16 @@ class ScoreRecord
     #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    #[ORM\Column(type: 'string', length: 32)]
     private string $playerName;
 
-    #[ORM\Column(type: 'float')]
-    private float $reactionTimeMs;
+    #[ORM\Column(type: 'integer')]
+    private int $reactionTimeMs;
 
     #[ORM\Column(type: 'datetime_immutable')]
     private DateTimeImmutable $recordedAt;
 
-    public function __construct(string $playerName, float $reactionTimeMs, DateTimeImmutable $recordedAt)
+    public function __construct(string $playerName, int $reactionTimeMs, DateTimeImmutable $recordedAt)
     {
         $this->playerName = $playerName;
         $this->reactionTimeMs = $reactionTimeMs;
@@ -48,7 +48,7 @@ class ScoreRecord
     public function toDomain(): DomainScore
     {
         return new DomainScore(
-            new PlayerName($this->playerName),
+            new DisplayName($this->playerName),
             new ReactionTime($this->reactionTimeMs),
             $this->recordedAt
         );
@@ -64,7 +64,7 @@ class ScoreRecord
         return $this->recordedAt;
     }
 
-    public function reactionTimeMs(): float
+    public function reactionTimeMs(): int
     {
         return $this->reactionTimeMs;
     }

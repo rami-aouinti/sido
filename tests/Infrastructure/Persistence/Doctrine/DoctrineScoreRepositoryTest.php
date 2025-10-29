@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Tests\Infrastructure\Persistence\Doctrine;
 
 use App\Application\Score\ScoreService;
-use App\Domain\Score\PlayerName;
-use App\Domain\Score\ReactionTime;
 use App\Domain\Score\Score;
 use App\Domain\Score\ScoreRepository;
+use App\Domain\Score\ValueObject\DisplayName;
+use App\Domain\Score\ValueObject\ReactionTime;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
@@ -47,10 +47,10 @@ final class DoctrineScoreRepositoryTest extends KernelTestCase
     public function testPersistsAndReturnsScoresOrderedByReactionTime(): void
     {
         $scores = [
-            new Score(new PlayerName('Alice'), new ReactionTime(180.5), new DateTimeImmutable('2024-01-01T10:00:00Z')),
-            new Score(new PlayerName('Bob'), new ReactionTime(150.3), new DateTimeImmutable('2024-01-01T09:00:00Z')),
-            new Score(new PlayerName('Charlie'), new ReactionTime(150.3), new DateTimeImmutable('2024-01-01T09:05:00Z')),
-            new Score(new PlayerName('Dana'), new ReactionTime(210.0), new DateTimeImmutable('2024-01-01T08:00:00Z')),
+            new Score(new DisplayName('Alice'), new ReactionTime(180), new DateTimeImmutable('2024-01-01T10:00:00Z')),
+            new Score(new DisplayName('Bob'), new ReactionTime(150), new DateTimeImmutable('2024-01-01T09:00:00Z')),
+            new Score(new DisplayName('Charlie'), new ReactionTime(150), new DateTimeImmutable('2024-01-01T09:05:00Z')),
+            new Score(new DisplayName('Dana'), new ReactionTime(210), new DateTimeImmutable('2024-01-01T08:00:00Z')),
         ];
 
         foreach ($scores as $score) {
@@ -71,7 +71,7 @@ final class DoctrineScoreRepositoryTest extends KernelTestCase
         foreach (range(1, 12) as $i) {
             $this->repository->add(
                 new Score(
-                    new PlayerName('Player '.$i),
+                    new DisplayName('Player '.$i),
                     new ReactionTime(100 + $i),
                     new DateTimeImmutable('2024-01-01T00:00:'.str_pad((string) $i, 2, '0', STR_PAD_LEFT).'Z')
                 )
@@ -89,8 +89,8 @@ final class DoctrineScoreRepositoryTest extends KernelTestCase
     {
         $this->repository->add(
             new Score(
-                new PlayerName('Solo'),
-                new ReactionTime(123.4),
+                new DisplayName('Solo'),
+                new ReactionTime(123),
                 new DateTimeImmutable('2024-01-01T00:00:00Z')
             )
         );
@@ -103,13 +103,13 @@ final class DoctrineScoreRepositoryTest extends KernelTestCase
         $container = static::getContainer();
         /** @var ScoreService $service */
         $service = $container->get(ScoreService::class);
-        $score = $service->submitScore('Integration Player', 145.6);
+        $score = $service->submitScore('Integration Player', 145);
 
         $results = $this->repository->topScores(10);
 
         self::assertCount(1, $results);
         self::assertSame('Integration Player', $results[0]->playerName()->value());
-        self::assertEqualsWithDelta(145.6, $results[0]->reactionTime()->toMilliseconds(), 0.0001);
+        self::assertSame(145, $results[0]->reactionTime()->toMilliseconds());
         self::assertEquals($score->recordedAt(), $results[0]->recordedAt());
     }
 }
