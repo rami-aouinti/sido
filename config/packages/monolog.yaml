@@ -1,0 +1,15 @@
+monolog:
+    channels: ['request']
+    handlers:
+        main:
+            type: stream
+            path: 'php://stdout'
+            level: info
+            formatter: monolog.formatter.json
+            channels: ['!request']
+        request:
+            type: stream
+            path: 'php://stdout'
+            level: info
+            formatter: monolog.formatter.json
+            channels: ['request']

@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Infrastructure\Persistence\Doctrine;
 
-use App\Application\Score\ScoreService;
+use App\Application\Score\Command\SubmitScoreCommand;
+use App\Application\Score\Command\SubmitScoreHandler;
 use App\Domain\Score\PlayerName;
 use App\Domain\Score\ReactionTime;
 use App\Domain\Score\Score;
@@ -98,12 +99,12 @@ final class DoctrineScoreRepositoryTest extends KernelTestCase
         self::assertSame([], $this->repository->topScores(0));
     }
 
-    public function testScoreServiceUsesDoctrineRepository(): void
+    public function testSubmitScoreHandlerUsesDoctrineRepository(): void
     {
         $container = static::getContainer();
-        /** @var ScoreService $service */
-        $service = $container->get(ScoreService::class);
-        $score = $service->submitScore('Integration Player', 145.6);
+        /** @var SubmitScoreHandler $handler */
+        $handler = $container->get(SubmitScoreHandler::class);
+        $score = $handler->handle(new SubmitScoreCommand('Integration Player', 145.6));
 
         $results = $this->repository->topScores(10);
 

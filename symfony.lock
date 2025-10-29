@@ -43,6 +43,12 @@
             "src/Kernel.php"
         ]
     },
+    "symfony/monolog-bundle": {
+        "version": "3.9",
+        "files": [
+            "config/packages/monolog.yaml"
+        ]
+    },
     "symfony/routing": {
         "version": "6.4",
         "recipe": {
