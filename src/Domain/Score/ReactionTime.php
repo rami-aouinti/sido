@@ -13,7 +13,7 @@ final class ReactionTime
 
     private float $milliseconds;
 
-    public function __construct(float $milliseconds)
+    public function __construct(int $milliseconds)
     {
         if (!is_finite($milliseconds)) {
             throw new InvalidArgumentException('Reaction time must be a finite number.');
@@ -30,7 +30,7 @@ final class ReactionTime
         $this->milliseconds = $milliseconds;
     }
 
-    public function toMilliseconds(): float
+    public function toMilliseconds(): int
     {
         return $this->milliseconds;
     }

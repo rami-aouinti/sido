@@ -41,11 +41,22 @@ docker compose up -d
 
 The build step installs PHP dependencies through Composer and caches the Docker layers for subsequent runs. The `up -d` command starts every service in the background, attaching the containers to the shared network.
 
-### Running database migrations
+### Configure environment variables
 
-Once the containers are up, run Doctrine migrations inside the PHP container:
+The default `.env` file already points `DATABASE_URL` at the PostgreSQL service started by Docker Compose:
+
+```
+postgresql://symfony:symfony@database:5432/app?serverVersion=15&charset=utf8
+```
+
+No additional changes are required unless you customise the database credentials in `docker-compose.yml`.
+
+### Preparing the database
+
+With the containers running you can create the database and apply the Doctrine migrations directly from inside the PHP container:
 
 ```bash
+docker compose exec php bin/console doctrine:database:create --if-not-exists
 docker compose exec php bin/console doctrine:migrations:migrate --no-interaction
 ```
 

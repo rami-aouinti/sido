@@ -8,7 +8,7 @@ final class SubmitScoreCommand
 {
     public function __construct(
         public readonly string $name,
-        public readonly float $reactionTime
+        public readonly int $reactionTime
     ) {
     }
 }

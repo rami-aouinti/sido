@@ -19,7 +19,7 @@ final class Version20240213000000 extends AbstractMigration
         $table = $schema->createTable('scores');
         $table->addColumn('id', 'integer', ['autoincrement' => true]);
         $table->addColumn('player_name', 'string', ['length' => 255]);
-        $table->addColumn('reaction_time_ms', 'float');
+        $table->addColumn('reaction_time_ms', 'integer');
         $table->addColumn('recorded_at', 'datetime_immutable');
         $table->setPrimaryKey(['id']);
         $table->addIndex(['reaction_time_ms', 'recorded_at', 'id'], 'idx_scores_reaction_time_recorded_at');

@@ -56,7 +56,7 @@ final class SubmitScoreHandlerTest extends TestCase
         $score = $this->handler->handle($command);
 
         self::assertSame('Alice', $score->playerName()->value());
-        self::assertSame(200.5, $score->reactionTime()->toMilliseconds());
+        self::assertSame(200, $score->reactionTime()->toMilliseconds());
         self::assertCount(1, $this->repository->topScores(10));
     }
 
