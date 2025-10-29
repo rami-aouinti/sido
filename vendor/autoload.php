@@ -5,6 +5,7 @@ declare(strict_types=1);
 spl_autoload_register(static function (string $class): void {
     $prefixes = [
         'App\\' => __DIR__ . '/../src/',
+        'Symfony\\Component\\Mercure\\' => __DIR__ . '/../src/Symfony/Component/Mercure/',
         'Symfony\\Component\\Validator\\' => __DIR__ . '/../src/Symfony/Component/Validator/',
     ];
 
