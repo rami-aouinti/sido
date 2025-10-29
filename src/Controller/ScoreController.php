@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Application\Score\Command\SubmitScoreCommand;
+use App\Application\Score\Command\SubmitScoreHandler;
 use App\Application\Score\Exception\ScoreValidationException;
-use App\Application\Score\ScoreService;
+use App\Application\Score\Query\GetTopScoresHandler;
+use App\Application\Score\Query\GetTopScoresQuery;
 use App\Domain\Score\Score;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,8 +17,10 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route(path: '/api/scores')]
 final class ScoreController
 {
-    public function __construct(private readonly ScoreService $scoreService)
-    {
+    public function __construct(
+        private readonly SubmitScoreHandler $submitScoreHandler,
+        private readonly GetTopScoresHandler $getTopScoresHandler
+    ) {
     }
 
     #[Route(path: '', name: 'score_submit', methods: ['POST'])]
@@ -37,7 +42,7 @@ final class ScoreController
         }
 
         try {
-            $score = $this->scoreService->submitScore($name, (float) $reactionTime);
+            $score = $this->submitScoreHandler->handle(new SubmitScoreCommand($name, (float) $reactionTime));
         } catch (ScoreValidationException $exception) {
             return new JsonResponse(['errors' => $exception->toArray()], JsonResponse::HTTP_BAD_REQUEST);
         }
@@ -55,7 +60,7 @@ final class ScoreController
     #[Route(path: '', name: 'score_leaderboard', methods: ['GET'])]
     public function leaderboard(): JsonResponse
     {
-        $scores = $this->scoreService->leaderboard();
+        $scores = $this->getTopScoresHandler->handle(new GetTopScoresQuery());
 
         $data = array_map(
             static fn (Score $score) => [

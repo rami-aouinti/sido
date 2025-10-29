@@ -2,16 +2,17 @@
 
 declare(strict_types=1);
 
-namespace App\Application\Score;
+namespace App\Application\Score\Command;
 
 use App\Application\Score\Exception\ScoreValidationException;
+use App\Application\Score\ScoreSubmission;
 use App\Domain\Score\PlayerName;
 use App\Domain\Score\ReactionTime;
 use App\Domain\Score\Score;
 use App\Domain\Score\ScoreRepository;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-final class ScoreService
+final class SubmitScoreHandler
 {
     public function __construct(
         private readonly ScoreRepository $repository,
@@ -22,9 +23,9 @@ final class ScoreService
     /**
      * @throws ScoreValidationException
      */
-    public function submitScore(string $name, float $reactionTime): Score
+    public function handle(SubmitScoreCommand $command): Score
     {
-        $submission = new ScoreSubmission($name, $reactionTime);
+        $submission = new ScoreSubmission($command->name, $command->reactionTime);
         $violations = $this->validator->validate($submission);
 
         if (count($violations) > 0) {
@@ -35,13 +36,5 @@ final class ScoreService
         $this->repository->add($score);
 
         return $score;
-    }
-
-    /**
-     * @return list<Score>
-     */
-    public function leaderboard(int $limit = 10): array
-    {
-        return $this->repository->topScores($limit);
     }
 }
