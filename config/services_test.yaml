@@ -1,0 +1,3 @@
+services:
+    App\Tests\Double\Messaging\InMemoryTopScorePublisher: ~
+    App\Application\Score\TopScorePublisher: '@App\Tests\Double\Messaging\InMemoryTopScorePublisher'
