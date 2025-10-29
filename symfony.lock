@@ -49,6 +49,12 @@
             "config/packages/monolog.yaml"
         ]
     },
+    "symfony/mercure-bundle": {
+        "version": "0.3",
+        "files": [
+            "config/packages/mercure.yaml"
+        ]
+    },
     "symfony/routing": {
         "version": "6.4",
         "recipe": {

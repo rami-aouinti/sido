@@ -8,6 +8,7 @@ use App\Application\Score\Command\SubmitScoreCommand;
 use App\Application\Score\Command\SubmitScoreHandler;
 use App\Application\Score\Query\GetTopScoresHandler;
 use App\Application\Score\Query\GetTopScoresQuery;
+use App\Application\Score\TopScorePublisher;
 use App\Infrastructure\Score\InMemoryScoreRepository;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Validator\Validation;
@@ -24,7 +25,16 @@ final class GetTopScoresHandlerTest extends TestCase
             ->enableAttributeMapping()
             ->getValidator();
 
-        $this->submitHandler = new SubmitScoreHandler($repository, $validator);
+        $publisher = new class() implements TopScorePublisher {
+            public array $publishedScores = [];
+
+            public function publish(array $scores): void
+            {
+                $this->publishedScores = $scores;
+            }
+        };
+
+        $this->submitHandler = new SubmitScoreHandler($repository, $validator, $publisher);
         $this->queryHandler = new GetTopScoresHandler($repository);
     }
 
