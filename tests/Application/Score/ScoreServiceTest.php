@@ -6,32 +6,27 @@ namespace App\Tests\Application\Score;
 
 use App\Application\Score\Exception\ScoreValidationException;
 use App\Application\Score\ScoreService;
-use App\Infrastructure\Messaging\MercureTop10Publisher;
+use App\Application\Score\TopScoresPublisher;
 use App\Infrastructure\Score\InMemoryScoreRepository;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Mercure\HubInterface;
-use Symfony\Component\Mercure\Update;
 use Symfony\Component\Validator\Validation;
-use const JSON_THROW_ON_ERROR;
-use function json_decode;
 
 final class ScoreServiceTest extends TestCase
 {
     private ScoreService $service;
     private InMemoryScoreRepository $repository;
-    private HubInterface $hub;
+    private FakePublisher $publisher;
 
     protected function setUp(): void
     {
         $this->repository = new InMemoryScoreRepository();
-        $this->hub = $this->createMock(HubInterface::class);
         $validator = Validation::createValidatorBuilder()
             ->enableAttributeMapping()
             ->getValidator();
 
-        $publisher = new MercureTop10Publisher($this->hub);
+        $this->publisher = new FakePublisher();
 
-        $this->service = new ScoreService($this->repository, $validator, $publisher);
+        $this->service = new ScoreService($this->repository, $validator, $this->publisher);
     }
 
     public function testSubmitScorePersistsAndReturnsScore(): void
@@ -45,30 +40,10 @@ final class ScoreServiceTest extends TestCase
 
     public function testSubmitScorePublishesTopScores(): void
     {
-        $capturedUpdate = null;
-
-        $this->hub
-            ->expects(self::once())
-            ->method('publish')
-            ->with(self::callback(static function (Update $update) use (&$capturedUpdate): bool {
-                $capturedUpdate = $update;
-
-                return true;
-            }))
-            ->willReturn('1');
-
         $score = $this->service->submitScore('Alice', 200.5);
 
-        self::assertInstanceOf(Update::class, $capturedUpdate);
-        self::assertSame('/scores/top', $capturedUpdate->getTopic());
-
-        $payload = json_decode($capturedUpdate->getData(), true, 512, JSON_THROW_ON_ERROR);
-
-        self::assertIsArray($payload);
-        self::assertArrayHasKey('scores', $payload);
-        self::assertSame('Alice', $payload['scores'][0]['name']);
-        self::assertSame(200.5, $payload['scores'][0]['reactionTime']);
-        self::assertSame($score->recordedAt()->format(DATE_ATOM), $payload['scores'][0]['recordedAt']);
+        self::assertSame(1, $this->publisher->publishCalls);
+        self::assertSame([$score], $this->publisher->publishedScores);
     }
 
     public function testSubmitScoreWithInvalidDataThrowsException(): void
@@ -90,5 +65,19 @@ final class ScoreServiceTest extends TestCase
         self::assertSame('Alice', $scores[0]->playerName()->value());
         self::assertSame('Charlie', $scores[1]->playerName()->value());
         self::assertSame('Bob', $scores[2]->playerName()->value());
+    }
+}
+
+final class FakePublisher implements TopScoresPublisher
+{
+    public int $publishCalls = 0;
+
+    /** @var list<\App\Domain\Score\Score> */
+    public array $publishedScores = [];
+
+    public function publish(array $scores): void
+    {
+        $this->publishCalls++;
+        $this->publishedScores = $scores;
     }
 }
