@@ -24,12 +24,12 @@ final class ScoreControllerTest extends WebTestCase
 
     public function testSubmitScoreReturnsCreatedResponse(): void
     {
-        $this->client->jsonRequest('POST', '/api/scores', ['name' => 'Alice', 'reactionTime' => 123.4]);
+        $this->client->jsonRequest('POST', '/api/scores', ['name' => 'Alice', 'reactionTime' => 123]);
 
         self::assertResponseStatusCodeSame(201);
         $data = json_decode($this->client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
         self::assertSame('Alice', $data['name']);
-        self::assertSame(123.4, $data['reactionTime']);
+        self::assertSame(123, $data['reactionTime']);
         self::assertArrayHasKey('recordedAt', $data);
     }
 
@@ -39,8 +39,32 @@ final class ScoreControllerTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(400);
         $data = json_decode($this->client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        self::assertArrayHasKey('errors', $data);
-        self::assertNotEmpty($data['errors']);
+        self::assertEqualsCanonicalizing([
+            ['name' => 'name', 'message' => 'Name must not be empty.'],
+            ['name' => 'reactionTime', 'message' => 'Reaction time must be greater than zero.'],
+        ], $data['errors']);
+    }
+
+    public function testSubmitScoreWithNonStringNameReturnsFieldError(): void
+    {
+        $this->client->jsonRequest('POST', '/api/scores', ['name' => ['Alice'], 'reactionTime' => 150]);
+
+        self::assertResponseStatusCodeSame(400);
+        $data = json_decode($this->client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        self::assertEqualsCanonicalizing([
+            ['name' => 'name', 'message' => 'Name must be a string.'],
+        ], $data['errors']);
+    }
+
+    public function testSubmitScoreWithNonIntegerReactionTimeReturnsFieldError(): void
+    {
+        $this->client->jsonRequest('POST', '/api/scores', ['name' => 'Alice', 'reactionTime' => 'fast']);
+
+        self::assertResponseStatusCodeSame(400);
+        $data = json_decode($this->client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        self::assertEqualsCanonicalizing([
+            ['name' => 'reactionTime', 'message' => 'Reaction time must be an integer.'],
+        ], $data['errors']);
     }
 
     public function testLeaderboardReturnsTopScores(): void

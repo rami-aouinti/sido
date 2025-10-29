@@ -26,30 +26,39 @@ final class ScoreController
             return new JsonResponse(['errors' => [['name' => 'body', 'message' => 'Invalid JSON payload.']]], JsonResponse::HTTP_BAD_REQUEST);
         }
 
-        $name = $payload['name'] ?? '';
+        $name = $payload['name'] ?? null;
         $reactionTime = $payload['reactionTime'] ?? null;
 
+        $errors = [];
+
         if (!is_string($name)) {
-            return new JsonResponse(
-                ['errors' => [['name' => 'payload', 'message' => 'Name must be a string and reaction time must be an integer.']]],
-                JsonResponse::HTTP_BAD_REQUEST
-            );
+            $errors[] = ['name' => 'name', 'message' => 'Name must be a string.'];
         }
 
-        $reactionTimeValue = match (true) {
-            is_int($reactionTime), is_string($reactionTime), is_float($reactionTime) => (string) $reactionTime,
-            default => null,
-        };
-
-        if ($reactionTimeValue === null || filter_var($reactionTimeValue, FILTER_VALIDATE_INT) === false) {
-            return new JsonResponse(
-                ['errors' => [['name' => 'payload', 'message' => 'Name must be a string and reaction time must be an integer.']]],
-                JsonResponse::HTTP_BAD_REQUEST
-            );
+        $reactionTimeValue = null;
+        if (is_int($reactionTime)) {
+            $reactionTimeValue = $reactionTime;
+        } elseif (is_string($reactionTime) || is_float($reactionTime)) {
+            $candidate = (string) $reactionTime;
+            $validated = filter_var($candidate, FILTER_VALIDATE_INT);
+            if ($validated !== false) {
+                $reactionTimeValue = (int) $validated;
+            }
         }
+
+        if ($reactionTimeValue === null) {
+            $errors[] = ['name' => 'reactionTime', 'message' => 'Reaction time must be an integer.'];
+        }
+
+        if ($errors !== []) {
+            return new JsonResponse(['errors' => $errors], JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        \assert(is_string($name));
+        \assert(is_int($reactionTimeValue));
 
         try {
-            $score = $this->scoreService->submitScore($name, (int) $reactionTimeValue);
+            $score = $this->scoreService->submitScore($name, $reactionTimeValue);
         } catch (ScoreValidationException $exception) {
             return new JsonResponse(['errors' => $exception->toArray()], JsonResponse::HTTP_BAD_REQUEST);
         }
