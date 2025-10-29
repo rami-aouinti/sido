@@ -23,13 +23,13 @@ class ScoreRecord
     #[ORM\Column(type: 'string', length: 255)]
     private string $playerName;
 
-    #[ORM\Column(type: 'float')]
-    private float $reactionTimeMs;
+    #[ORM\Column(type: 'integer')]
+    private int $reactionTimeMs;
 
     #[ORM\Column(type: 'datetime_immutable')]
     private DateTimeImmutable $recordedAt;
 
-    public function __construct(string $playerName, float $reactionTimeMs, DateTimeImmutable $recordedAt)
+    public function __construct(string $playerName, int $reactionTimeMs, DateTimeImmutable $recordedAt)
     {
         $this->playerName = $playerName;
         $this->reactionTimeMs = $reactionTimeMs;
@@ -64,7 +64,7 @@ class ScoreRecord
         return $this->recordedAt;
     }
 
-    public function reactionTimeMs(): float
+    public function reactionTimeMs(): int
     {
         return $this->reactionTimeMs;
     }

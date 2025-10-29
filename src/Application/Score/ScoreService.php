@@ -22,7 +22,7 @@ final class ScoreService
     /**
      * @throws ScoreValidationException
      */
-    public function submitScore(string $name, float $reactionTime): Score
+    public function submitScore(string $name, int $reactionTime): Score
     {
         $submission = new ScoreSubmission($name, $reactionTime);
         $violations = $this->validator->validate($submission);

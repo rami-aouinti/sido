@@ -8,9 +8,9 @@ use InvalidArgumentException;
 
 final class ReactionTime
 {
-    private float $milliseconds;
+    private int $milliseconds;
 
-    public function __construct(float $milliseconds)
+    public function __construct(int $milliseconds)
     {
         if ($milliseconds <= 0) {
             throw new InvalidArgumentException('Reaction time must be positive.');
@@ -19,7 +19,7 @@ final class ReactionTime
         $this->milliseconds = $milliseconds;
     }
 
-    public function toMilliseconds(): float
+    public function toMilliseconds(): int
     {
         return $this->milliseconds;
     }

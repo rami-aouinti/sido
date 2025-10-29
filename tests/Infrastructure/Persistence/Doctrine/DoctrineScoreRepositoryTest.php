@@ -47,10 +47,10 @@ final class DoctrineScoreRepositoryTest extends KernelTestCase
     public function testPersistsAndReturnsScoresOrderedByReactionTime(): void
     {
         $scores = [
-            new Score(new PlayerName('Alice'), new ReactionTime(180.5), new DateTimeImmutable('2024-01-01T10:00:00Z')),
-            new Score(new PlayerName('Bob'), new ReactionTime(150.3), new DateTimeImmutable('2024-01-01T09:00:00Z')),
-            new Score(new PlayerName('Charlie'), new ReactionTime(150.3), new DateTimeImmutable('2024-01-01T09:05:00Z')),
-            new Score(new PlayerName('Dana'), new ReactionTime(210.0), new DateTimeImmutable('2024-01-01T08:00:00Z')),
+            new Score(new PlayerName('Alice'), new ReactionTime(181), new DateTimeImmutable('2024-01-01T10:00:00Z')),
+            new Score(new PlayerName('Bob'), new ReactionTime(150), new DateTimeImmutable('2024-01-01T09:00:00Z')),
+            new Score(new PlayerName('Charlie'), new ReactionTime(150), new DateTimeImmutable('2024-01-01T09:05:00Z')),
+            new Score(new PlayerName('Dana'), new ReactionTime(210), new DateTimeImmutable('2024-01-01T08:00:00Z')),
         ];
 
         foreach ($scores as $score) {
@@ -90,7 +90,7 @@ final class DoctrineScoreRepositoryTest extends KernelTestCase
         $this->repository->add(
             new Score(
                 new PlayerName('Solo'),
-                new ReactionTime(123.4),
+                new ReactionTime(123),
                 new DateTimeImmutable('2024-01-01T00:00:00Z')
             )
         );
@@ -103,13 +103,13 @@ final class DoctrineScoreRepositoryTest extends KernelTestCase
         $container = static::getContainer();
         /** @var ScoreService $service */
         $service = $container->get(ScoreService::class);
-        $score = $service->submitScore('Integration Player', 145.6);
+        $score = $service->submitScore('Integration Player', 145);
 
         $results = $this->repository->topScores(10);
 
         self::assertCount(1, $results);
         self::assertSame('Integration Player', $results[0]->playerName()->value());
-        self::assertEqualsWithDelta(145.6, $results[0]->reactionTime()->toMilliseconds(), 0.0001);
+        self::assertSame(145, $results[0]->reactionTime()->toMilliseconds());
         self::assertEquals($score->recordedAt(), $results[0]->recordedAt());
     }
 }

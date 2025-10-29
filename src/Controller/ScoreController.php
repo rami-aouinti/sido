@@ -29,7 +29,19 @@ final class ScoreController
         $name = $payload['name'] ?? '';
         $reactionTime = $payload['reactionTime'] ?? null;
 
-        if (!is_string($name) || !is_numeric($reactionTime)) {
+        if (!is_string($name)) {
+            return new JsonResponse(
+                ['errors' => [['name' => 'payload', 'message' => 'Name must be a string and reaction time must be numeric.']]],
+                JsonResponse::HTTP_BAD_REQUEST
+            );
+        }
+
+        $reactionTimeValue = match (true) {
+            is_int($reactionTime), is_string($reactionTime), is_float($reactionTime) => (string) $reactionTime,
+            default => null,
+        };
+
+        if ($reactionTimeValue === null || filter_var($reactionTimeValue, FILTER_VALIDATE_INT) === false) {
             return new JsonResponse(
                 ['errors' => [['name' => 'payload', 'message' => 'Name must be a string and reaction time must be numeric.']]],
                 JsonResponse::HTTP_BAD_REQUEST
@@ -37,7 +49,7 @@ final class ScoreController
         }
 
         try {
-            $score = $this->scoreService->submitScore($name, (float) $reactionTime);
+            $score = $this->scoreService->submitScore($name, (int) $reactionTimeValue);
         } catch (ScoreValidationException $exception) {
             return new JsonResponse(['errors' => $exception->toArray()], JsonResponse::HTTP_BAD_REQUEST);
         }

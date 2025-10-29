@@ -27,10 +27,10 @@ final class ScoreServiceTest extends TestCase
 
     public function testSubmitScorePersistsAndReturnsScore(): void
     {
-        $score = $this->service->submitScore('Alice', 200.5);
+        $score = $this->service->submitScore('Alice', 200);
 
         self::assertSame('Alice', $score->playerName()->value());
-        self::assertSame(200.5, $score->reactionTime()->toMilliseconds());
+        self::assertSame(200, $score->reactionTime()->toMilliseconds());
         self::assertCount(1, $this->repository->topScores(10));
     }
 
