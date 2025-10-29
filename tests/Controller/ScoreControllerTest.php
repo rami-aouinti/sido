@@ -24,7 +24,7 @@ final class ScoreControllerTest extends WebTestCase
 
     public function testSubmitScoreReturnsCreatedResponse(): void
     {
-        $this->client->jsonRequest('POST', '/api/scores', ['name' => 'Alice', 'reactionTime' => 123.4]);
+        $this->client->jsonRequest('POST', '/api/scores', ['name' => 'Alice', 'reactionTime' => '123.4']);
 
         self::assertResponseStatusCodeSame(201);
         $data = json_decode($this->client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
