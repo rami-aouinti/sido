@@ -10,20 +10,20 @@ use DateTimeImmutable;
 
 final class Score
 {
-    private DisplayName $displayName;
+    private DisplayName $playerName;
     private ReactionTime $reactionTime;
     private DateTimeImmutable $recordedAt;
 
-    public function __construct(DisplayName $displayName, ReactionTime $reactionTime, ?DateTimeImmutable $recordedAt = null)
+    public function __construct(DisplayName $playerName, ReactionTime $reactionTime, ?DateTimeImmutable $recordedAt = null)
     {
-        $this->displayName = $displayName;
+        $this->playerName = $playerName;
         $this->reactionTime = $reactionTime;
         $this->recordedAt = $recordedAt ?? new DateTimeImmutable();
     }
 
     public function playerName(): DisplayName
     {
-        return $this->displayName;
+        return $this->playerName;
     }
 
     public function reactionTime(): ReactionTime
