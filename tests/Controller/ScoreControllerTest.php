@@ -67,6 +67,17 @@ final class ScoreControllerTest extends WebTestCase
         ], $data['errors']);
     }
 
+    public function testSubmitScoreWithNumericStringReactionTimeStillReturnsFieldError(): void
+    {
+        $this->client->jsonRequest('POST', '/api/scores', ['name' => 'Alice', 'reactionTime' => '123']);
+
+        self::assertResponseStatusCodeSame(400);
+        $data = json_decode($this->client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        self::assertEqualsCanonicalizing([
+            ['name' => 'reactionTime', 'message' => 'Reaction time must be an integer.'],
+        ], $data['errors']);
+    }
+
     public function testLeaderboardReturnsTopScores(): void
     {
         $this->client->jsonRequest('POST', '/api/scores', ['name' => 'Alice', 'reactionTime' => 150]);

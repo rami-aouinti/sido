@@ -35,18 +35,7 @@ final class ScoreController
             $errors[] = ['name' => 'name', 'message' => 'Name must be a string.'];
         }
 
-        $reactionTimeValue = null;
-        if (is_int($reactionTime)) {
-            $reactionTimeValue = $reactionTime;
-        } elseif (is_string($reactionTime) || is_float($reactionTime)) {
-            $candidate = (string) $reactionTime;
-            $validated = filter_var($candidate, FILTER_VALIDATE_INT);
-            if ($validated !== false) {
-                $reactionTimeValue = (int) $validated;
-            }
-        }
-
-        if ($reactionTimeValue === null) {
+        if (!is_int($reactionTime)) {
             $errors[] = ['name' => 'reactionTime', 'message' => 'Reaction time must be an integer.'];
         }
 
@@ -55,10 +44,10 @@ final class ScoreController
         }
 
         \assert(is_string($name));
-        \assert(is_int($reactionTimeValue));
+        \assert(is_int($reactionTime));
 
         try {
-            $score = $this->scoreService->submitScore($name, $reactionTimeValue);
+            $score = $this->scoreService->submitScore($name, $reactionTime);
         } catch (ScoreValidationException $exception) {
             return new JsonResponse(['errors' => $exception->toArray()], JsonResponse::HTTP_BAD_REQUEST);
         }
