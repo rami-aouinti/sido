@@ -34,15 +34,17 @@ final class ScoreController
         $name = $payload['name'] ?? '';
         $reactionTime = $payload['reactionTime'] ?? null;
 
-        $validatedReactionTime = match (true) {
-            is_int($reactionTime) => $reactionTime,
-            is_string($reactionTime) && filter_var($reactionTime, FILTER_VALIDATE_INT) !== false => (int) $reactionTime,
-            default => null,
-        };
+        $validatedReactionTime = null;
+        if ($reactionTime !== null) {
+            $filteredReactionTime = filter_var($reactionTime, FILTER_VALIDATE_FLOAT);
+            if ($filteredReactionTime !== false) {
+                $validatedReactionTime = (float) $filteredReactionTime;
+            }
+        }
 
         if (!is_string($name) || $validatedReactionTime === null) {
             return new JsonResponse(
-                ['errors' => [['name' => 'payload', 'message' => 'Name must be a string and reaction time must be an integer.']]],
+                ['errors' => [['name' => 'payload', 'message' => 'Name must be a string and reaction time must be a number.']]],
                 JsonResponse::HTTP_BAD_REQUEST
             );
         }

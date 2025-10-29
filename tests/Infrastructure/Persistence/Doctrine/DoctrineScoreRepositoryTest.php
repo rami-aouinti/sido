@@ -104,13 +104,13 @@ final class DoctrineScoreRepositoryTest extends KernelTestCase
         $container = static::getContainer();
         /** @var SubmitScoreHandler $handler */
         $handler = $container->get(SubmitScoreHandler::class);
-        $score = $handler->handle(new SubmitScoreCommand('Integration Player', 145));
+        $score = $handler->handle(new SubmitScoreCommand('Integration Player', 145.0));
 
         $results = $this->repository->topScores(10);
 
         self::assertCount(1, $results);
         self::assertSame('Integration Player', $results[0]->playerName()->value());
-        self::assertSame(145, $results[0]->reactionTime()->toMilliseconds());
+        self::assertSame(145.0, $results[0]->reactionTime()->toMilliseconds());
         self::assertEquals($score->recordedAt(), $results[0]->recordedAt());
     }
 }
